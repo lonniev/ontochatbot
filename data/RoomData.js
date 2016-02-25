@@ -134,17 +134,11 @@ const camperBotRooms = [camperBotChatRooms]
 
 const BotRoomData = {
   // this controls which rooms you can access
-  YOUR_GITHUB_ID: [
+  ontochatbot: [
     // change this to be a room your user is already in
     {
-      title: 'bothelp',
-      name: 'YOUR_GITHUB_ID/testing',
-      icon: 'question',
-      topics: ['chitchat', 'bots', 'bot-development', 'camperbot']
-    },
-    {
-      title: 'bothelp',
-      name: 'bothelp/testing',
+      title: 'api4kbs',
+      name: 'API4KBs/api4kbs',
       icon: 'question',
       topics: ['chitchat', 'bots', 'bot-development', 'camperbot']
     }

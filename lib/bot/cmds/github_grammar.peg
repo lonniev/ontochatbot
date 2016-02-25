@@ -1,0 +1,158 @@
+{ var bodyTerminator; }
+
+start = github request:request { return request }
+
+ws = ([ \t\r\n])*
+WS = ([ \t\r\n])+
+
+github = ws keyword:'github'i { return keyword.toLowerCase() }
+
+issue = ws keyword:'issue'i { return keyword.toLowerCase() }
+file = ws keyword:'file'i { return keyword.toLowerCase() }
+
+issue_id = ws token:[0-9]+ { return token.join( '' ) }
+
+username = ws token:[a-z]i+ { return token.join( '' ); }
+for = ws keyword:'for'i WS '@' { return keyword }
+
+verb = new / close / get / summarize
+
+new = ws keyword:'new'i { return keyword.toLowerCase() }
+close = ws keyword:'close'i { return keyword.toLowerCase() }
+get = ws keyword:'get'i { return keyword.toLowerCase() }
+summarize = ws keyword:'summarize'i { return keyword.toLowerCase() }
+
+request = (new issue data:issue_operation) { return { "method": "new_issue", "data": data } }
+        / (close issue data:target_issue) { return { "method": "close_issue", "data": data } }
+        / (file file_operation)
+        
+issue_operation = title:issue_summary props:issue_property* bodytext:body?
+{
+  function hasProperty( property )
+  {
+    return this in property;
+  }
+
+  var data = {};
+
+  if ( title ) data.title = title;
+
+  var assigneeProperty = props.filter( hasProperty, "assignee" );
+
+  if (assigneeProperty.length > 0) data.assignee = assigneeProperty[0].assignee
+
+  var milestoneProperty = props.filter( hasProperty, "milestone" );
+
+  if (milestoneProperty.length > 0) data.milestone = milestoneProperty[0].milestone
+
+  var labelsProperty = props.filter( hasProperty, "labels" );
+
+  if (labelsProperty.length > 0) data.labels = labelsProperty[0].labels
+
+  if ( bodytext ) data.body = bodytext;
+
+  return data
+}
+
+target_issue = issue:issue_id
+{ return { "issue": issue } }
+
+issue_property = value:assignee { return { "assignee":value } }
+               / value:due { return { "milestone":value } }
+               / value:labelset { return { "labels":value } }
+                   
+due = milestone value:milestone_id { return value }
+
+milestone = ws keyword:'milestone'i { return keyword.toLowerCase() }
+milestone_id = ws token:[0-9]+ { return token.join( '' ) }
+
+labels = ws keyword:'labels'i { return keyword.toLowerCase() }
+
+labelset = labels ws '[' ws token:(label_id)+ ws ']' { return token }
+label_id = string
+
+file_operation = get
+
+issue_summary = string
+
+assignee = for assignee:username { return assignee }
+
+herestart = ws token:'<HERE' { return token }
+hereend = token:'END' { return token }
+
+body = token:DelimitedBodyVariable { return token }
+
+string "string"
+  = ws quotation_begin token:char* quotation_end { return token.join(""); }
+
+char
+  = unescaped
+  / escape
+    sequence:(
+        '"'
+      / "\\"
+      / "/"
+      / "b" { return "\b"; }
+      / "f" { return "\f"; }
+      / "n" { return "\n"; }
+      / "r" { return "\r"; }
+      / "t" { return "\t"; }
+      / "u" digits:$(HEXDIG HEXDIG HEXDIG HEXDIG) {
+          return String.fromCharCode(parseInt(digits, 16));
+        }
+    )
+    { return sequence; }
+
+escape         = "\\"
+quotation_begin = [\"\u00AB\u201C\u201F]
+quotation_end = [\"\u201D\u300B\u301E\u301F]
+
+unescaped      = [\x20-\x21\x23-\x5B\x5D-\u10FFFF]
+
+/* ----- Core ABNF Rules ----- */
+
+/* See RFC 4234, Appendix B (http://tools.ietf.org/html/rfc4627). */
+DIGIT  = [0-9]
+HEXDIG = [0-9a-f]i
+
+DelimitedBodyVariable
+  = ws "<<<" terminator:Text1 EOLF
+    &{ bodyTerminator = terminator; return true; }
+    lines:DelimitedBodyVariableLine*
+    DelimitedBodyVariableTerminator
+    {
+      return lines.join("\n");
+    }
+
+DelimitedBodyVariableLine
+  = !DelimitedBodyVariableTerminator text:Text0 EOL { return text; }
+
+DelimitedBodyVariableTerminator
+  = terminator:Text1 EOLF &{ return terminator === bodyTerminator }
+
+Text0 "zero or more characters"
+  = chars:[^\n\r]* { return chars.join(""); }
+
+Text1 "one or more characters"
+  = chars:[^\n\r]+ { return chars.join(""); }
+
+EmptyLine "empty line"
+  = S* EOL
+
+EOLF "end of line or file"
+  = EOL / EOF
+
+EOL "end of line"
+  = "\n"
+  / "\r\n"
+  / "\r"
+
+EOF "end of file"
+  = !. { return ""; }
+  
+/*
+ * What "\s" matches in JavaScript regexps, sans "\r", "\n", "\u2028" and
+ * "\u2029". See ECMA-262, 5.1 ed., 15.10.2.12.
+ */
+S "whitespace"
+  = [\t\v\f \u00A0\u1680\u180E\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u202F\u205F\u3000\uFEFF]

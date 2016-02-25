@@ -12,7 +12,7 @@ const AppConfig = {
   org: 'bothelp',
   testUser: 'bothelp',
   // so bot doesnt get in a loop replying itself
-  botlist: ['bothelp', 'camperbot', 'YOUR_GITHUB_ID', 'demobot'],
+  botlist: ['bothelp', 'camperbot', 'ontochatbot', 'demobot'],
   webuser: 'webuser',
   wikiHost: 'https://github.com/freecodecamp/freecodecamp/wiki/',
   gitterHost: 'https://gitter.im/',
@@ -95,11 +95,11 @@ const AppConfig = {
 const envConfigs = {
 
   // replace this with your own ID
-  YOUR_GITHUB_ID: {
-    botname: 'YOUR_GITHUB_ID',
-    appHost: 'http://localhost:7000',
-    apiServer: 'freecodecamp.com',
-    appRedirectUrl: 'http://localhost:7891/login/callback'
+  ontochatbot: {
+    botname: 'ontochatbot',
+    appHost: "http://localhost:7000",
+    apiServer: "freecodecamp.com",
+    appRedirectUrl: "http://localhost:7891/login/callback",
   },
 
   demobot: {
@@ -122,12 +122,14 @@ const envConfigs = {
     apiServer: 'www.freecodecamp.com',
     appRedirectUrl: 'http://localhost:7891/login/callback'
   },
+  
   beta: {
     botname: 'bothelp',
     appHost: 'http://localhost:7000',
     apiServer: 'beta.freecodecamp.com',
     appRedirectUrl: 'http://localhost:7891/login/callback'
   },
+  
   prod: {
     botname: 'camperbot',
     appHost: 'http://bot.freecodecamp.com',
