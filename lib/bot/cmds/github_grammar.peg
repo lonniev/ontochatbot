@@ -6,29 +6,57 @@ ws = ([ \t\r\n])*
 WS = ([ \t\r\n])+
 
 github = ws keyword:'github'i { return keyword.toLowerCase() }
-
 issue = ws keyword:'issue'i { return keyword.toLowerCase() }
 issues = ws keyword:'issues'i { return keyword.toLowerCase() }
-file = ws keyword:'file'i { return keyword.toLowerCase() }
-
-issue_id = ws token:[0-9]+ { return token.join( '' ) }
-
-username = ws token:[a-z]i+ { return token.join( '' ); }
-for = ws keyword:'for'i WS '@' { return keyword }
-
-verb = new / close / search / get / summarize
-
 new = ws keyword:'new'i { return keyword.toLowerCase() }
 close = ws keyword:'close'i { return keyword.toLowerCase() }
 get = ws keyword:'get'i { return keyword.toLowerCase() }
 search = ws keyword:'search'i { return keyword.toLowerCase() }
+list = ws keyword:'list'i { return keyword.toLowerCase() }
+comment = ws keyword:'comment'i { return keyword.toLowerCase() }
 summarize = ws keyword:'summarize'i { return keyword.toLowerCase() }
+comment = ws keyword:'comment'i { return keyword.toLowerCase() }
+add = ws keyword:'add'i { return keyword.toLowerCase() }
+create = ws keyword:'create'i { return keyword.toLowerCase() }
+for = ws keyword:'for'i { return keyword.toLowerCase() }
+on = ws keyword:'on'i { return keyword.toLowerCase() }
+to = ws keyword:'to'i { return keyword.toLowerCase() }
+in = ws keyword:'in'i { return keyword.toLowerCase() }
+a = ws keyword:'a'i { return keyword.toLowerCase() }
+an = ws keyword:'an'i { return keyword.toLowerCase() }
+the = ws keyword:'the'i { return keyword.toLowerCase() }
+that = ws keyword:'that'i { return keyword.toLowerCase() }
+are = ws keyword:'are'i { return keyword.toLowerCase() }
+is = ws keyword:'is'i { return keyword.toLowerCase() }
+state = ws keyword:'state'i { return keyword.toLowerCase() }
+open = ws keyword:'open'i { return keyword.toLowerCase() }
+closed = ws keyword:'closed'i { return keyword.toLowerCase() }
+any = ws keyword:'any'i { return keyword.toLowerCase() }
+milestone = ws keyword:'milestone'i { return keyword.toLowerCase() }
+labels = ws keyword:'labels'i { return keyword.toLowerCase() }
 
-request = (new issue data:issue_operation) { return { "method": "new_issue", "data": data } }
+that_are = that? (are / is)?
+
+username = ws token:[a-z]i+ { return token.join( '' ); }
+
+blame = for WS '@' { return 'blame' }
+
+file = ws keyword:'file'i { return keyword.toLowerCase() }
+
+issue_id = ws token:[0-9]+ { return token.join( '' ) }
+target_issue = ws '#'? issue:issue_id { return { "issue": issue } }
+
+article = a / an / the
+verb = new / close / search / get / comment
+pause = ws [\,\;\=\.\>] ws
+
+
+request = ((new/add/create)+ issue data:issue_operation) { return { "method": "new_issue", "data": data } }
         / (close issue data:target_issue) { return { "method": "close_issue", "data": data } }
-        / (search issues data:search_operation) { return { "method": "search_issues", "data": data } }
+        / ((search/list) issues data:search_operation) { return { "method": "search_issues", "data": data } }
+        / ((add/new/create)+ comment (for/to/on)? data:comment_operation) { return { "method": "comment_issue", "data": data } }
         / (file file_operation)
-        
+
 issue_operation = title:issue_summary props:issue_property* bodytext:body?
 {
   function hasProperty( property )
@@ -56,6 +84,19 @@ issue_operation = title:issue_summary props:issue_property* bodytext:body?
 
   return data;
 }
+
+comment_operation = issue? target:target_issue pause? content:comment_text
+{
+  return {
+    "issue": target.issue,
+    "body": content
+  };
+}
+
+comment_text =
+  (first: issue_summary) ws (second: body) { return [ first, second ].join( " " ); }
+  / issue_summary
+  / body
 
 search_operation = title:issue_summary? props:issue_property* bodytext:body?
 {
@@ -102,9 +143,6 @@ search_operation = title:issue_summary? props:issue_property* bodytext:body?
   return data;
 }
 
-target_issue = '#'? issue:issue_id
-{ return { "issue": issue } }
-
 issue_property = value:assignee { return { "assignee":value } }
                / value:due { return { "milestone":value } }
                / value:labelset { return { "labels":value } }
@@ -112,27 +150,12 @@ issue_property = value:assignee { return { "assignee":value } }
 
 status = that_are state:in_state { return state }
 
-that_are = that? (are / is)?
-that = ws keyword:'that'i { return keyword.toLowerCase() }
-are = ws keyword:'are'i { return keyword.toLowerCase() }
-is = ws keyword:'is'i { return keyword.toLowerCase() }
-
-in_state = in? state:state_name state?  { return state }
-in = ws keyword:'in'i { return keyword.toLowerCase() }
+in_state = in? article? state:state_name state?  { return state }
 
 state_name = state:( open / closed / any ) { return state }
-state = ws keyword:'state'i { return keyword.toLowerCase() }
-
-open = ws keyword:'open'i { return keyword.toLowerCase() }
-closed = ws keyword:'closed'i { return keyword.toLowerCase() }
-any = ws keyword:'any'i { return keyword.toLowerCase() }
-
 due = milestone value:milestone_id { return value }
 
-milestone = ws keyword:'milestone'i { return keyword.toLowerCase() }
 milestone_id = ws token:[0-9]+ { return token.join( '' ) }
-
-labels = ws keyword:'labels'i { return keyword.toLowerCase() }
 
 labelset = labels ws '[' ws token:(label_id)+ ws ']' { return token }
 label_id = string
@@ -141,7 +164,7 @@ file_operation = get
 
 issue_summary = string
 
-assignee = for assignee:username { return assignee }
+assignee = blame assignee:username { return assignee }
 
 herestart = ws token:'<HERE' { return token }
 hereend = token:'END' { return token }
@@ -173,7 +196,7 @@ escape         = "\\"
 quotation_begin = [\"\u00AB\u201C\u201F]
 quotation_end = [\"\u201D\u300B\u301E\u301F]
 
-unescaped      = [\x20-\x21\x23-\x5B\x5D-\u10FFFF]
+unescaped      = [\'\u2018\x20-\x21\x23-\x5B\x5D-\u10FFFF]
 
 /* ----- Core ABNF Rules ----- */
 
