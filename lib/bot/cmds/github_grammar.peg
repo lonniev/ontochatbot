@@ -8,6 +8,7 @@ WS = ([ \t\r\n])+
 github = ws keyword:'github'i { return keyword.toLowerCase() }
 
 issue = ws keyword:'issue'i { return keyword.toLowerCase() }
+issues = ws keyword:'issues'i { return keyword.toLowerCase() }
 file = ws keyword:'file'i { return keyword.toLowerCase() }
 
 issue_id = ws token:[0-9]+ { return token.join( '' ) }
@@ -15,15 +16,17 @@ issue_id = ws token:[0-9]+ { return token.join( '' ) }
 username = ws token:[a-z]i+ { return token.join( '' ); }
 for = ws keyword:'for'i WS '@' { return keyword }
 
-verb = new / close / get / summarize
+verb = new / close / search / get / summarize
 
 new = ws keyword:'new'i { return keyword.toLowerCase() }
 close = ws keyword:'close'i { return keyword.toLowerCase() }
 get = ws keyword:'get'i { return keyword.toLowerCase() }
+search = ws keyword:'search'i { return keyword.toLowerCase() }
 summarize = ws keyword:'summarize'i { return keyword.toLowerCase() }
 
 request = (new issue data:issue_operation) { return { "method": "new_issue", "data": data } }
         / (close issue data:target_issue) { return { "method": "close_issue", "data": data } }
+        / (search issues data:search_operation) { return { "method": "search_issues", "data": data } }
         / (file file_operation)
         
 issue_operation = title:issue_summary props:issue_property* bodytext:body?
@@ -51,16 +54,79 @@ issue_operation = title:issue_summary props:issue_property* bodytext:body?
 
   if ( bodytext ) data.body = bodytext;
 
-  return data
+  return data;
 }
 
-target_issue = issue:issue_id
+search_operation = title:issue_summary? props:issue_property* bodytext:body?
+{
+  function hasProperty( property )
+  {
+    return this in property;
+  }
+
+  var data = { whereclause: "" };
+
+  if ( title && ( title.length > 0 ) ) data.whereclause = [
+    title.replace( /\s/, ' ' ),
+    data.whereclause
+  ].join( ' ' );
+
+  var assigneeProperty = props.filter( hasProperty, "assignee" );
+
+  if (assigneeProperty.length > 0) data.whereclause = [
+    data.whereclause,
+    "involves:" + assigneeProperty[0].assignee
+  ].join( ' ' );
+
+  var labelsProperty = props.filter( hasProperty, "labels" );
+
+  if (labelsProperty.length > 0) data.whereclause = [
+    data.whereclause,
+    labelsProperty[0].labels.map( function( elem, index, all ) { "label:" + elem } )
+  ].join( ' ' );
+
+  var stateProperty = props.filter( hasProperty, "state" );
+
+  if ( ( stateProperty.length > 0 ) && ( stateProperty[0].state != "any" ) ) data.whereclause = [
+    data.whereclause,
+    "state:" + stateProperty[0].state
+  ].join( ' ' );
+
+  if ( bodytext ) data.whereclause = [
+    bodytext.replace( /\s/, ' ' ),
+    data.whereclause
+  ].join( ' ' );
+
+  data.whereclause = data.whereclause.replace( /\s*(.*?)\s*/, "$1" );
+
+  return data;
+}
+
+target_issue = '#'? issue:issue_id
 { return { "issue": issue } }
 
 issue_property = value:assignee { return { "assignee":value } }
                / value:due { return { "milestone":value } }
                / value:labelset { return { "labels":value } }
-                   
+               / value:status { return { "state": value } }
+
+status = that_are state:in_state { return state }
+
+that_are = that? (are / is)?
+that = ws keyword:'that'i { return keyword.toLowerCase() }
+are = ws keyword:'are'i { return keyword.toLowerCase() }
+is = ws keyword:'is'i { return keyword.toLowerCase() }
+
+in_state = in? state:state_name state?  { return state }
+in = ws keyword:'in'i { return keyword.toLowerCase() }
+
+state_name = state:( open / closed / any ) { return state }
+state = ws keyword:'state'i { return keyword.toLowerCase() }
+
+open = ws keyword:'open'i { return keyword.toLowerCase() }
+closed = ws keyword:'closed'i { return keyword.toLowerCase() }
+any = ws keyword:'any'i { return keyword.toLowerCase() }
+
 due = milestone value:milestone_id { return value }
 
 milestone = ws keyword:'milestone'i { return keyword.toLowerCase() }
