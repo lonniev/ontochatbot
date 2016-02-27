@@ -57,7 +57,7 @@ request = ((new/add/create)+ issue data:issue_operation) { return { "method": "n
         / ((add/new/create)+ comment (for/to/on)? data:comment_operation) { return { "method": "comment_issue", "data": data } }
         / (file file_operation)
 
-issue_operation = title:issue_summary props:issue_property* bodytext:body?
+issue_operation = props_before:issue_property* title:issue_summary props_after:issue_property* bodytext:body?
 {
   function hasProperty( property )
   {
@@ -65,6 +65,8 @@ issue_operation = title:issue_summary props:issue_property* bodytext:body?
   }
 
   var data = {};
+
+  var props = props_before.concat( props_after );
 
   if ( title ) data.title = title;
 
@@ -196,7 +198,7 @@ escape         = "\\"
 quotation_begin = [\"\u00AB\u201C\u201F]
 quotation_end = [\"\u201D\u300B\u301E\u301F]
 
-unescaped      = [\'\u2018\x20-\x21\x23-\x5B\x5D-\u10FFFF]
+unescaped      = [\'\u2018\u2019\x20-\x21\x23-\x5B\x5D-\u10FFFF]
 
 /* ----- Core ABNF Rules ----- */
 
