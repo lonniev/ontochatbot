@@ -1,0 +1,17 @@
+extends layout
+
+block content
+
+  include nav
+
+  .container-fluid
+    .row
+      .col-md-12
+        .home
+          h4 Authenticate with GitHub through Firebase
+          p In order to have OntoChatBot perform GitHub modifications on your behalf, you #{user} have to authenticate with GitHub through Firebase. Firebase will securely record your GitHub OAuth Access Token. This authentication is optional. Do not click the button if you do not want to trust Firebase and OntoChatBot with this delegation.
+
+          form.form-signin(action="/firebase/trust", method="post")
+            input.input-block-level(type="text", name="username", placeholder="Email address")
+            input.input-block-level(type="password", name="password", placeholder="Password")
+            button.pull-right( type="submit" ).btn.btn-primary GitHub Authenticate

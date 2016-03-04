@@ -141,8 +141,16 @@ const BotRoomData = {
       name: 'API4KBs/api4kbs',
       icon: 'question',
       topics: ['chitchat', 'bots', 'bot-development', 'camperbot']
+    },
+
+    {
+      title: 'sandbox',
+      name: 'ontochatbot/sandbox',
+      icon: 'question',
+      topics: ['chitchat', 'bots', 'bot-development', 'camperbot']
     }
   ],
+  
   // this is the demobot that ships with the app
   demobot: [{
     title: 'demobot',
