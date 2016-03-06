@@ -1,5 +1,8 @@
 'use strict';
 
+const https = require('https');
+const pem = require('pem');
+
 require('dotenv').config({path: 'dot.env'});
 
 console.log('--------------- startup ------------------');
@@ -36,6 +39,22 @@ app.use(app.router);
 GBot.init();
 routes.init(app, GBot, passport);
 
-app.listen( port );
+pem.createCertificate(
 
-console.log('Demo app running at http://localhost:' + port);
+  { days: 30, selfSigned: true },
+  
+  (err, keys) =>
+  {
+    https.createServer(
+      { key: keys.serviceKey, cert: keys.certificate },
+      app
+    )
+    .listen( port,
+      ready =>
+      {
+        console.log('OntoChatBot app running at https://localhost:' + port);
+      }
+    );
+  }
+  
+);

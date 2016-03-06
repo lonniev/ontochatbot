@@ -1,6 +1,6 @@
 { var bodyTerminator; }
 
-start = github request:request { return request }
+start = github request:request ws { return request }
 
 ws = ([ \t\r\n])*
 WS = ([ \t\r\n])+
