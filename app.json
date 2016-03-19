@@ -1,0 +1,10 @@
+{
+  "name": "ontochatbot",
+  "engines": {
+    "node": "5.7.0"
+  },
+  "env": {
+    "FIREBASE_SEED": "0123456789abcdef",
+    "FIREBASE_SECRET": "5XgCLOowoMspECps1LCBBqA37R9J8679IhnH8kNz"
+  }
+}

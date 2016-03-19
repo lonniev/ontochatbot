@@ -1,18 +1,32 @@
 {
-  "name": "camperbot",
+  "name": "ontochatbot",
   "version": "0.0.12",
+  "license": "Creative Commons",
+  "engines": {
+    "node": "5.7.0"
+  },
+  "env": {
+    "FIREBASE_SEED": "0123456789abcdef",
+    "FIREBASE_SECRET": "5XgCLOowoMspECps1LCBBqA37R9J8679IhnH8kNz"
+  },
   "dependencies": {
     "cli-color": "",
+    "crypto-js": "3.1.6",
     "dotenv": "^1.2.0",
     "express": "~3.4.4",
     "firebase": "^2.4.1",
+    "github4": "0.5.4",
     "jade": "~0.35.0",
     "lodash": "^3.10.1",
     "node-gitter": "^1.2.8",
     "passport": "~0.2.0",
     "passport-oauth2": "~1.1.1",
+    "pegjs": "0.9.0",
+    "pegjs-require": "1.0.0",
+    "pem": "1.8.1",
+    "pluralize": "1.2.1",
     "request": "~2.27.0",
-    "simple-encryptor": "^1.0.3",
+    "spell-it": "0.1.2",
     "tape": "4.5.0"
   },
   "devDependencies": {

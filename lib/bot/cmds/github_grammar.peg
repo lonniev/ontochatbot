@@ -37,7 +37,7 @@ labels = ws keyword:'labels'i { return keyword.toLowerCase() }
 
 that_are = that? (are / is)?
 
-username = ws token:[a-z]i+ { return token.join( '' ); }
+username = ws token:[a-z0-9]i+ { return token.join( '' ); }
 
 blame = for WS '@' { return 'blame' }
 
