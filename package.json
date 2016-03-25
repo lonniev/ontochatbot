@@ -1,6 +1,6 @@
 {
   "name": "ontochatbot",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "license": "Creative Commons",
   "engines": {
     "node": "5.7.0"

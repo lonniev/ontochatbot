@@ -151,7 +151,7 @@ const BotRoomData = {
     },
                 
     {
-      title: 'VisumPoint',
+      title: 'visumpoint',
       name: 'lonniev/visumpoint',
       icon: 'question',
       topics: ['chitchat', 'bots', 'bot-development', 'camperbot']
