@@ -148,7 +148,15 @@ const BotRoomData = {
       name: 'ontochatbot/sandbox',
       icon: 'question',
       topics: ['chitchat', 'bots', 'bot-development', 'camperbot']
+    },
+                
+    {
+      title: 'VisumPoint',
+      name: 'lonniev/visumpoint',
+      icon: 'question',
+      topics: ['chitchat', 'bots', 'bot-development', 'camperbot']
     }
+
   ],
   
   // this is the demobot that ships with the app
