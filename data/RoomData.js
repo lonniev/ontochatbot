@@ -149,6 +149,13 @@ const BotRoomData = {
       icon: 'question',
       topics: ['chitchat', 'bots', 'bot-development', 'camperbot']
     },
+
+    {
+      title: 'protege-server',
+      name: 'protegeproject/protege-server',
+      icon: 'question',
+      topics: ['chitchat', 'bots', 'bot-development', 'camperbot']
+    },
                 
     {
       title: 'visumpoint',
